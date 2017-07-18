@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Get The Music From the XML</title>
+        <script src="music.js"></script>
+        <script>
+            window.onload = function()
+            {
+                var parser = new DOMParser();
+                XMLDocument = parser.parseFromString(xml, "text/xml");
+                var elementsArray = XMLDocument.documentElement.getElementsByTagName('composition');
+                var arrayLength = elementsArray.length;
+                var output = "<table>";
+                for(var i=0; i < arrayLength; i++)
+                    {
+                        var title = elementsArray[i].getElementsByTagName('title')
+                        [0].firstChild.nodeValue;
+                        var composer = elementsArray[i].getElementsByTagName('composer')
+                        [0].firstChild.nodeValue;
+                        var time = elementsArray[i].getElementsByTagName('time')
+                        [0].firstChild.nodeValue;
+                        var filename = elementsArray[i].getElementsByTagName('filename')
+                        [0].firstChild.nodeValue;
+                        output += "<tr>";
+                        output += ("<td>" + title + "</td><td>" + composer + "</td><td>" + time + "</td><td>" + filename + "</td>");
+                        output += "</tr>";
+                    }
+                output += "</table>";
+                document.getElementById('result').innerHTML = output;
+            }
+        </script>
+    </head>
+    <body>
+        <div id="result"></div>
+    </body>
+</html>

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Using the Audio Tag</title>
+        <script src="music.js"></script>
+        <style>
+        button.css3button{
+                font-family: Arial, Helvetica, sans-serif;
+                font-size: 14px;
+                color: #ffffff;
+                padding: 10px 20px;
+                background: -moz-linear-gradient(
+                    top,
+                    #ff4242 0%,
+                    #003366);
+                background: -webkit-gradient(
+                    linear, left top, left bottom,
+                    from(#ff4242),
+                    to(#003366));
+                -moz-border-radius: 10px;
+                -webkit-border-radius: 10px;
+                border-radius: 10px;
+                border: 1px solid #66001a;
+                -moz-box-shadow:
+                    0px 1px 3px rgba(0,0,0,0.5),
+                    inset 0px 0px 1px rgba(255,255,255,0.5);
+                -webkit-box-shadow:
+                    0px 1px 3px rgba(0,0,0,0.5),
+                    inset 0px 0px 1px rgba(255,255,255,0.5);
+                box-shadow:
+                    0px 1px 3px rgba(0,0,0,0.5),
+                    inset 0px 0px 1px rgba(255,255,255,0.5);
+                text-shadow:
+                    0px -1px 0px rgba(000,000,000,0.7),
+                    0px 1px 0px rgba(255,255,255,0.3);
+            }
+        </style>
+        <script>
+            var player;
+            var intv;
+            var slider;
+            var currSong;
+            //Init
+            //
+            /////////////////////////
+            window.onload = function()
+            {
+                document.getElementById('btnPlay').addEventListener('click', playMusic, false);
+                document.getElementById('btnPause').addEventListener('click', pauseMusic, false);
+                document.getElementById('btnStop').addEventListener('click', stopMusic, false);
+                document.getElementById('btnVolUp').addEventListener('click', volUp, false);
+                document.getElementById('btnVolDown').addEventListener('click', volDown, false);
+                player = document.getElementById('player');
+                slider = document.getElementById('sliderTime');
+                slider.addEventListener('change', reposition, false);
+                getMusicList();
+            }
+            
+            function reposition()
+            {
+                player.currentTime = slider.value;
+            }
+            
+            //Volume Controls
+            //
+            // 0.0 Silent - 1.0 Full Volume
+            //////////////////////////
+            function volUp()
+            {
+                if(player.volume < 1)
+                    {
+                        player.volume += 0.1;
+                    }
+                else
+                    {
+                        player.volume = 1;
+                    }
+            }
+            function volDown()
+            {
+                if(player.volume > 0)
+                    {
+                        player.volume -= 0.1;
+                    }
+                else
+                    {
+                        player.volume = 0;
+                    }
+            }
+            
+            //Music Play Controls
+            //
+            //////////////////////////
+            function playMusic()
+            {
+                player.play();
+                intv = setInterval(update, 100);
+                slider.max = player.duration;
+            }
+            
+            function update()
+            {
+                document.getElementById('songTime').innerHTML = millisToMins(player.currentTime);
+                slider.value = player.currentTime;
+            }
+            
+            function millisToMins(seconds)
+            {
+                var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+                var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
+                
+                var outCount;
+                
+                if (Math.round(numseconds) >= 10)
+                {
+                    outCount = "Time Elapsed: " + numminutes + ":" + Math.round(numseconds);
+                }
+                else
+                {
+                    outCount = "Time Elapsed: " + numminutes + ":0" + Math.round(numseconds);
+                }
+                
+                return outCount;
+                
+            }
+            
+            function pauseMusic()
+            {
+                player.pause();
+                clearInterval(intv);
+            }
+            
+            function stopMusic()
+            {
+                player.pause();
+                player.currentTime = 0;
+                clearInterval(intv);
+            }
+            
+            function getMusicList()
+            {
+                var parser = new DOMParser();
+                XMLDocument = parser.parseFromString(xml, "text/xml");
+                var elementsArray = XMLDocument.documentElement.getElementsByTagName('composition');
+                var arrayLength = elementsArray.length;
+                var output = "<table>";
+                for(var i=0; i < arrayLength; i++)
+                    {
+                        var song = i;
+                        var title = elementsArray[i].getElementsByTagName('title')
+                        [0].firstChild.nodeValue;
+                        var composer = elementsArray[i].getElementsByTagName('composer')
+                        [0].firstChild.nodeValue;
+                        var time = elementsArray[i].getElementsByTagName('time')
+                        [0].firstChild.nodeValue;
+                        var filename = elementsArray[i].getElementsByTagName('filename')
+                        [0].firstChild.nodeValue;
+                        output += "<tr>";
+                        output += ("<td onclick='songSelect(\"" + filename +"\")'>" + title + "</td><td onclick='songSelect(\"" + filename +"\")'>" + composer + "</td>");
+                        output += "</tr>";
+                    }
+                output += "</table>";
+                document.getElementById('musicList').innerHTML = output;
+            }
+            
+            function songSelect(fn)
+            {
+                document.getElementById('player').src = fn;
+                playMusic();
+            }
+        </script>
+        <style>
+            #musicList td
+            {
+                border : 1px solid black;
+                padding: 3px;
+            }
+            
+            #musicList td:hover
+            {
+                background-color: #990000;
+                color: white;
+            }
+        </style>
+    </head>
+    <body>
+    <audio id="player">
+        <source src="http://xn--prabhta-sagiita-rjb5298j.net/1-999/270%20TOMA%27R%20KATHA%27%20A%27MI.mp3" />
+    </audio>
+    <button id="btnPlay" class="css3button">Play</button>
+    <button id="btnPause" class="css3button">Pause</button>
+    <button id="btnStop" class="css3button">Stop</button><br/>
+    <button id="btnVolUp" class="css3button">Volume +</button>
+    <button id="btnVolDown" class="css3button">Volume -</button><br/>
+    <span id="songTime"></span><br/>
+    <input id="sliderTime" type="range" min="0" value="0">
+    <div id="musicList"></div>
+    </body>
+</html>
